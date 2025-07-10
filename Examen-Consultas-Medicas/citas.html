@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Citas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+</head>
+
+<body ng-controller="CitasController">
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">Consulta Médica</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="medicos.html">Médicos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="citas.html">Mis Citas</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <!-- Formulario para nueva cita -->
+    <div class="container mt-4">
+        <h4>Agendar nueva cita</h4>
+        <form ng-submit="agendarCita()" class="row g-3 mb-4">
+            <div class="col-md-4">
+                <input type="text" class="form-control" placeholder="Nombre del médico" ng-model="nuevaCita.medico"
+                    required />
+            </div>
+            <div class="col-md-4">
+                <input type="text" class="form-control" placeholder="Especialidad" ng-model="nuevaCita.especialidad" />
+            </div>
+            <div class="col-md-4">
+                <input type="date" class="form-control" placeholder="Fecha" ng-model="nuevaCita.fecha" required />
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-success" type="submit">Agendar</button>
+            </div>
+        </form>
+
+        <!-- LISTA DE CITAS -->
+        <h4>Mis Citas</h4>
+        <table class="table table-striped mt-3">
+            <thead>
+                <tr>
+                    <th>Médico</th>
+                    <th>Especialidad</th>
+                    <th>Fecha</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="cita in citas">
+                    <td>{{ cita.medico }}</td>
+                    <td>{{ cita.especialidad }}</td>
+                    <td>{{ cita.fecha }}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" ng-click="cancelarCita($index)">Cancelar</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <!-- Footer -->
+    <footer class="text-center mt-5 mb-3 text-muted">
+        <hr />
+        <p>© 2025 Consulta Médica Online</p>
+    </footer>
+    <!-- JS -->
+     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        angular.module('citasApp', [])
+            .controller('CitasController', function ($scope) {
+                const STORAGE_KEY = 'misCitas';
+
+                $scope.citas = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+
+                $scope.nuevaCita = {
+                    medico: '',
+                    especialidad: '',
+                    fecha: ''
+                };
+
+                $scope.agendarCita = function () {
+                    if ($scope.nuevaCita.medico && $scope.nuevaCita.fecha) {
+                        $scope.citas.push({
+                            ...$scope.nuevaCita
+                        });
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify($scope.citas));
+                        $scope.nuevaCita = {};
+                    }
+                };
+
+                $scope.cancelarCita = function (index) {
+                    if (confirm('¿Estás seguro de cancelar esta cita?')) {
+                        $scope.citas.splice(index, 1);
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify($scope.citas));
+                    }
+                };
+            });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,20 @@
+[
+
+{
+    "nombre": "Dr. Juan Pérez",
+    "especialidad": "Cardiología",
+    "horario": "Lunes a Viernes, 9am - 5pm"
+}
+,
+{
+    "nombre": "Dra. Ana Gómez",
+    "especialidad": "Pediatría",
+    "horario": "Lunes a Viernes, 8am - 4pm"
+},
+{
+    "nombre": "Dr. Carlos López",
+    "especialidad": "Dermatología",
+    "horario": "Martes y Jueves, 10am - 6pm"
+}
+
+]
