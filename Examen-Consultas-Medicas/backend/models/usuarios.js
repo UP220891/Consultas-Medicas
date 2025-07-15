@@ -5,23 +5,21 @@ const usuarioSchema = new Schema({
     nombre: { 
         type: String, 
         required: true,
-        trim: true  // Elimina espacios en blanco al inicio y final
+        trim: true
     },
     email: { 
         type: String, 
         required: true,
-        unique: true,  // Garantiza que no haya emails duplicados
+        unique: true,
         trim: true,
-        lowercase: true,  // Guarda el email en minúsculas
-        match: [/.+\@.+\..+/, 'Por favor ingresa un email válido']  // Validación básica de email
+        lowercase: true
     },
     contraseña: { 
         type: String, 
-        required: true,
-        minlength: [6, 'La contraseña debe tener al menos 6 caracteres'] 
+        required: true
     }
 }, {
-    timestamps: true  // Añade automáticamente campos createdAt y updatedAt
+    timestamps: true
 });
 
 module.exports = mongoose.model('Usuario', usuarioSchema);
