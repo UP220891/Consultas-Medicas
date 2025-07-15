@@ -9,6 +9,8 @@ const connectDB = async () => {
       useUnifiedTopology: true
     });
     console.log('✅ Conectado a MongoDB');
+    console.log('📂 Base de datos activa:', mongoose.connection.name);
+
   } catch (error) {
     console.error('❌ Error al conectar a MongoDB:', error);
     process.exit(1);
