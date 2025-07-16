@@ -134,15 +134,18 @@ router.post('/login', async (req, res) => {
 router.get('/perfil', autenticar, async (req, res) => {
   try {
     res.json({
+      success: true,
       usuario: {
         id: req.usuario._id,
         nombre: req.usuario.nombre,
-        email: req.usuario.email
+        email: req.usuario.email,
+        createdAt: req.usuario.createdAt
       }
     });
   } catch (error) {
     console.error('Error obteniendo perfil:', error);
     res.status(500).json({
+      success: false,
       mensaje: 'Error del servidor',
       error: error.message
     });

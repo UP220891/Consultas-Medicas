@@ -8,8 +8,7 @@ const citaSchema = new Schema({
         required: true
     },
     medico: {
-        type: Schema.Types.ObjectId,
-        ref: 'Medico',
+        type: String,
         required: true
     },
     fecha: {

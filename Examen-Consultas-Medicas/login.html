@@ -268,6 +268,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/auth.js"></script>
     <script>
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -279,36 +280,24 @@
             btnLogin.innerHTML = '<span class="loading"></span> Iniciando sesión...';
             btnLogin.disabled = true;
             
-            const formData = {
+            const credenciales = {
                 email: document.getElementById('email').value,
                 contraseña: document.getElementById('contraseña').value
             };
             
             try {
-                const response = await fetch('http://localhost:3000/api/auth/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-                });
+                const resultado = await iniciarSesion(credenciales);
                 
-                const data = await response.json();
-                
-                if (response.ok) {
-                    // Guardar token en localStorage
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('usuario', JSON.stringify(data.usuario));
-                    
+                if (resultado.success) {
                     mostrarMensaje('¡Inicio de sesión exitoso! Redirigiendo...', 'success');
                     setTimeout(() => {
                         window.location.href = 'index.html';
                     }, 2000);
                 } else {
-                    mostrarMensaje(data.mensaje, 'danger');
+                    mostrarMensaje(resultado.message, 'danger');
                 }
             } catch (error) {
-                mostrarMensaje('Error al conectar con el servidor', 'danger');
+                mostrarMensaje('Error inesperado', 'danger');
             } finally {
                 // Restaurar botón
                 btnLogin.innerHTML = originalText;

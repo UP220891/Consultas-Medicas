@@ -114,6 +114,18 @@
             font-weight: 600;
         }
 
+        .citas-medico {
+            max-width: 200px;
+        }
+
+        .citas-medico small {
+            line-height: 1.2;
+        }
+
+        .badge {
+            font-size: 0.7rem;
+        }
+
         footer {
             background: var(--aqua-gradient);
             color: white;
@@ -186,6 +198,34 @@
                     <li class="nav-item">
                         <a class="nav-link" href="citas.html">Citas</a>
                     </li>
+                    
+                    <!-- Links de autenticación - se ocultan cuando el usuario está logueado -->
+                    <li class="nav-item" id="loginLink">
+                        <a class="nav-link" href="login.html">
+                            <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                        </a>
+                    </li>
+                    <li class="nav-item" id="registroLink">
+                        <a class="nav-link" href="registro.html">
+                            <i class="fas fa-user-plus"></i> Registrarse
+                        </a>
+                    </li>
+                    
+                    <!-- Dropdown del usuario - se muestra cuando está logueado -->
+                    <li class="nav-item dropdown d-none" id="usuarioDropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user"></i> <span id="nombreUsuario">Usuario</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="verPerfil()">
+                                <i class="fas fa-user-circle"></i> Ver Perfil
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="cerrarSesion()">
+                                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                            </a></li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -211,6 +251,7 @@
                                 <th>Nombre</th>
                                 <th>Especialidad</th>
                                 <th>Horario</th>
+                                <th>Citas Próximas</th>
                             </tr>
                         </thead>
                         <tbody id="tabla-medicos">
@@ -229,29 +270,139 @@
     </footer>
 
     <!-- JS-->
-
+    <script src="js/auth.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         $(document).ready(function () {
+            console.log('Página cargada, iniciando carga de médicos...');
+            
+            let citasData = {}; // Para almacenar las citas por médico
+            
             $('#toggle-btn').click(function () {
                 $('#medicos-container').toggle();
             });
 
-            $.getJSON("js/medicos.json", function (data) {
-                const tabla = $("#tabla-medicos");
-                data.forEach(medico => {
-                    const fila = `<tr>
-                    <td>${medico.nombre}</td>
-                    <td>${medico.especialidad}</td>
-                    <td>${medico.horario}</td>
-                </tr>`;
-                    tabla.append(fila);
+            // Función para obtener citas de todos los médicos
+            function cargarCitasMedicos() {
+                console.log('Cargando citas de médicos...');
+                
+                // Verificar si hay usuario logueado para hacer la petición
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    console.log('No hay token, saltando carga de citas');
+                    return Promise.resolve({});
+                }
+                
+                return $.ajax({
+                    url: 'http://localhost:3000/api/citas/todas',
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }).then(function(response) {
+                    console.log('Citas obtenidas:', response);
+                    
+                    if (response.success && response.citas) {
+                        // Agrupar citas por médico
+                        const citasPorMedico = {};
+                        response.citas.forEach(cita => {
+                            if (!citasPorMedico[cita.medico]) {
+                                citasPorMedico[cita.medico] = [];
+                            }
+                            
+                            // Solo incluir citas pendientes y confirmadas
+                            if (cita.estado === 'pendiente' || cita.estado === 'confirmada') {
+                                citasPorMedico[cita.medico].push(cita);
+                            }
+                        });
+                        
+                        return citasPorMedico;
+                    }
+                    return {};
+                }).catch(function(error) {
+                    console.error('Error al obtener citas:', error);
+                    return {};
                 });
-            }).fail(function () {
-                alert("No se pudieron cargar los médicos desde el archivo local");
-            });
+            }
+            
+            // Función para formatear las citas de un médico
+            function formatearCitasMedico(citas) {
+                if (!citas || citas.length === 0) {
+                    return '<span class="text-muted">Sin citas próximas</span>';
+                }
+                
+                // Ordenar citas por fecha
+                citas.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+                
+                // Mostrar solo las próximas 3 citas
+                const citasProximas = citas.slice(0, 3);
+                
+                let html = '<div class="citas-medico">';
+                citasProximas.forEach(cita => {
+                    const fecha = new Date(cita.fecha);
+                    const fechaFormateada = fecha.toLocaleDateString('es-ES', {
+                        day: '2-digit',
+                        month: '2-digit'
+                    });
+                    
+                    const estadoClass = cita.estado === 'confirmada' ? 'success' : 'warning';
+                    const estadoTexto = cita.estado === 'confirmada' ? 'Confirmada' : 'Pendiente';
+                    
+                    html += `
+                        <small class="d-block mb-1">
+                            <i class="fas fa-calendar-alt"></i> ${fechaFormateada} - ${cita.hora}
+                            <span class="badge bg-${estadoClass} ms-1">${estadoTexto}</span>
+                        </small>
+                    `;
+                });
+                
+                if (citas.length > 3) {
+                    html += `<small class="text-muted">+${citas.length - 3} más...</small>`;
+                }
+                
+                html += '</div>';
+                return html;
+            }
 
+            // Cargar médicos y citas
+            Promise.all([
+                $.getJSON("js/medicos.json"),
+                cargarCitasMedicos()
+            ]).then(function([medicosData, citasData]) {
+                console.log('Médicos cargados exitosamente:', medicosData);
+                console.log('Citas cargadas:', citasData);
+                
+                const tabla = $("#tabla-medicos");
+                
+                if (medicosData && medicosData.length > 0) {
+                    medicosData.forEach(medico => {
+                        console.log('Procesando médico:', medico);
+                        
+                        const citasMedico = citasData[medico.nombre] || [];
+                        const citasHTML = formatearCitasMedico(citasMedico);
+                        
+                        const fila = `<tr>
+                            <td>${medico.nombre}</td>
+                            <td>${medico.especialidad}</td>
+                            <td>${medico.horario}</td>
+                            <td>${citasHTML}</td>
+                        </tr>`;
+                        tabla.append(fila);
+                    });
+                    console.log('Médicos agregados a la tabla');
+                } else {
+                    console.warn('No se encontraron médicos en el archivo JSON');
+                    tabla.append('<tr><td colspan="4">No se encontraron médicos</td></tr>');
+                }
+            }).catch(function(error) {
+                console.error('Error al cargar datos:', error);
+                alert("No se pudieron cargar los médicos desde el archivo local. Error: " + error);
+                
+                // Fallback: mostrar mensaje de error en la tabla
+                const tabla = $("#tabla-medicos");
+                tabla.append('<tr><td colspan="4">Error al cargar médicos</td></tr>');
+            });
         });
     </script>
 </body>

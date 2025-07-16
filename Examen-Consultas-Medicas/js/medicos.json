@@ -1,20 +1,23 @@
 [
-
-{
-    "nombre": "Dr. Juan Pérez",
-    "especialidad": "Cardiología",
-    "horario": "Lunes a Viernes, 9am - 5pm"
-}
-,
-{
-    "nombre": "Dra. Ana Gómez",
-    "especialidad": "Pediatría",
-    "horario": "Lunes a Viernes, 8am - 4pm"
-},
-{
-    "nombre": "Dr. Carlos López",
-    "especialidad": "Dermatología",
-    "horario": "Martes y Jueves, 10am - 6pm"
-}
-
+    {
+        "nombre": "Dr. Juan Pérez",
+        "especialidad": "Cardiología",
+        "horario": "Lunes a Viernes, 9am - 5pm",
+        "dias": ["lunes", "martes", "miercoles", "jueves", "viernes"],
+        "horas": ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"]
+    },
+    {
+        "nombre": "Dra. Ana Gómez",
+        "especialidad": "Pediatría",
+        "horario": "Lunes a Viernes, 8am - 4pm",
+        "dias": ["lunes", "martes", "miercoles", "jueves", "viernes"],
+        "horas": ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"]
+    },
+    {
+        "nombre": "Dr. Carlos López",
+        "especialidad": "Dermatología",
+        "horario": "Martes y Jueves, 10am - 6pm",
+        "dias": ["martes", "jueves"],
+        "horas": ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"]
+    }
 ]

@@ -8,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root {
             --aqua-primary: #00bcd4;
@@ -100,6 +101,91 @@
             box-shadow: 0 0 0 0.2rem rgba(0, 188, 212, 0.25);
         }
 
+        .form-label {
+            font-weight: 600;
+            color: var(--aqua-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        select.form-control {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 16px 12px;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+        }
+
+        .alert {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .badge {
+            font-size: 0.8rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 20px;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            border-radius: 6px;
+            margin-right: 0.25rem;
+        }
+
+        .btn-outline-primary {
+            border-color: var(--aqua-primary);
+            color: var(--aqua-primary);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--aqua-primary);
+            border-color: var(--aqua-primary);
+        }
+
+        .btn-primary {
+            background: var(--aqua-gradient);
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 188, 212, 0.3);
+        }
+
+        .btn-info {
+            background-color: var(--aqua-secondary);
+            border-color: var(--aqua-secondary);
+        }
+
+        .btn-info:hover {
+            background-color: var(--aqua-primary);
+            border-color: var(--aqua-primary);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ff9800, #ffb74d);
+            border: none;
+            color: white;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #f57c00, #ff9800);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(255, 152, 0, 0.3);
+            color: white;
+        }
+
         .btn-success {
             background: var(--aqua-gradient);
             border: none;
@@ -112,6 +198,17 @@
         .btn-success:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(0, 188, 212, 0.3);
+        }
+
+        .btn-success.btn-sm {
+            background: linear-gradient(135deg, #4caf50, #66bb6a);
+            padding: 0.25rem 0.5rem;
+        }
+
+        .btn-success.btn-sm:hover {
+            background: linear-gradient(135deg, #388e3c, #4caf50);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(76, 175, 80, 0.3);
         }
 
         .btn-danger {
@@ -189,7 +286,7 @@
     </style>
 </head>
 
-<body ng-controller="CitasController">
+<body ng-app="citasApp" ng-controller="CitasController">
 
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -210,6 +307,37 @@
                     <li class="nav-item">
                         <a class="nav-link active" href="citas.html">Citas</a>
                     </li>
+                    <li class="nav-item d-none" id="historialLink">
+                        <a class="nav-link" href="historial.html">Historial</a>
+                    </li>
+                    
+                    <!-- Links de autenticación - se ocultan cuando el usuario está logueado -->
+                    <li class="nav-item" id="loginLink">
+                        <a class="nav-link" href="login.html">
+                            <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                        </a>
+                    </li>
+                    <li class="nav-item" id="registroLink">
+                        <a class="nav-link" href="registro.html">
+                            <i class="fas fa-user-plus"></i> Registrarse
+                        </a>
+                    </li>
+                    
+                    <!-- Dropdown del usuario - se muestra cuando está logueado -->
+                    <li class="nav-item dropdown d-none" id="usuarioDropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user"></i> <span id="nombreUsuario">Usuario</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="verPerfil()">
+                                <i class="fas fa-user-circle"></i> Ver Perfil
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="cerrarSesion()">
+                                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                            </a></li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -227,45 +355,172 @@
                 
                 <!-- Formulario para nueva cita -->
                 <h4 class="mb-3"><i class="fas fa-plus-circle"></i> Agendar nueva cita</h4>
+                
                 <form ng-submit="agendarCita()" class="row g-3 mb-4">
-                    <div class="col-md-4">
-                        <input type="text" class="form-control" placeholder="Nombre del médico" ng-model="nuevaCita.medico"
-                            required />
+                    <div class="col-md-6">
+                        <label class="form-label">Médico</label>
+                        <select class="form-control" ng-model="nuevaCita.medico" ng-change="actualizarHorarios()" required>
+                            <option value="">Seleccione un médico</option>
+                            <option ng-repeat="medico in medicos" value="{{medico.nombre}}">
+                                {{medico.nombre}} - {{medico.especialidad}}
+                            </option>
+                        </select>
+                        <small class="form-text text-muted" ng-if="nuevaCita.medico">
+                            <i class="fas fa-info-circle"></i> 
+                            {{ obtenerHorarioMedico(nuevaCita.medico) }}
+                        </small>
                     </div>
-                    <div class="col-md-4">
-                        <input type="text" class="form-control" placeholder="Especialidad" ng-model="nuevaCita.especialidad" />
+                    <div class="col-md-3">
+                        <label class="form-label">Fecha</label>
+                        <input type="date" class="form-control" ng-model="nuevaCita.fecha" ng-change="actualizarHorariosPorFecha()" min="{{fechaMinima}}" required />
                     </div>
-                    <div class="col-md-4">
-                        <input type="date" class="form-control" placeholder="Fecha" ng-model="nuevaCita.fecha" required />
+                    <div class="col-md-3">
+                        <label class="form-label">Hora</label>
+                        <select class="form-control" ng-model="nuevaCita.hora" required ng-disabled="!nuevaCita.medico">
+                            <option value="">Seleccione una hora</option>
+                            <option ng-repeat="hora in horasDisponibles" value="{{hora}}">
+                                {{formatearHora(hora)}}
+                            </option>
+                        </select>
+                        <small class="form-text text-danger" ng-if="nuevaCita.medico && nuevaCita.fecha && horasDisponibles.length === 0">
+                            <i class="fas fa-exclamation-triangle"></i> 
+                            El médico no trabaja este día
+                        </small>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-12">
+                        <label class="form-label">Motivo de la consulta</label>
+                        <textarea class="form-control" rows="3" placeholder="Describa el motivo de su consulta..." ng-model="nuevaCita.motivo" required></textarea>
+                    </div>
+                    <div class="col-12">
                         <button class="btn btn-success" type="submit">
-                            <i class="fas fa-calendar-plus"></i> Agendar
+                            <i class="fas fa-calendar-plus"></i> Agendar Cita
                         </button>
+                        <span ng-if="cargandoMedicos" class="text-muted ms-3">
+                            <i class="fas fa-spinner fa-spin"></i> Cargando médicos...
+                        </span>
                     </div>
                 </form>
+
+                <!-- Formulario para editar cita -->
+                <div ng-if="editandoCita" class="mt-4 p-4 border border-warning rounded">
+                    <h4 class="mb-3 text-warning"><i class="fas fa-edit"></i> Editar Cita</h4>
+                    
+                    <form ng-submit="guardarEdicionCita()" class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Médico</label>
+                            <select class="form-control" ng-model="citaEditando.medico" ng-change="actualizarHorariosEdicion()" required>
+                                <option value="">Seleccione un médico</option>
+                                <option ng-repeat="medico in medicos" value="{{medico.nombre}}">
+                                    {{medico.nombre}} - {{medico.especialidad}}
+                                </option>
+                            </select>
+                            <small class="form-text text-muted" ng-if="citaEditando.medico">
+                                <i class="fas fa-info-circle"></i> 
+                                {{ obtenerHorarioMedico(citaEditando.medico) }}
+                            </small>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Fecha</label>
+                            <input type="date" class="form-control" ng-model="citaEditando.fecha" ng-change="actualizarHorariosPorFechaEdicion()" min="{{fechaMinima}}" required />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Hora</label>
+                            <select class="form-control" ng-model="citaEditando.hora" required ng-disabled="!citaEditando.medico">
+                                <option value="">Seleccione una hora</option>
+                                <option ng-repeat="hora in horasDisponiblesEdicion" value="{{hora}}">
+                                    {{formatearHora(hora)}}
+                                </option>
+                            </select>
+                            <small class="form-text text-danger" ng-if="citaEditando.medico && citaEditando.fecha && horasDisponiblesEdicion.length === 0">
+                                <i class="fas fa-exclamation-triangle"></i> 
+                                El médico no trabaja este día
+                            </small>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Motivo de la consulta</label>
+                            <textarea class="form-control" rows="3" placeholder="Describa el motivo de su consulta..." ng-model="citaEditando.motivo" required></textarea>
+                        </div>
+                        <div class="col-12">
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-save"></i> Guardar Cambios
+                            </button>
+                            <button class="btn btn-secondary ms-2" type="button" ng-click="cancelarEdicion()">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                        </div>
+                    </form>
+                </div>
 
                 <hr class="my-4">
 
                 <!-- LISTA DE CITAS -->
                 <h4 class="mb-3"><i class="fas fa-list"></i> Mis Citas</h4>
-                <table class="table table-striped mt-3">
+                
+                <!-- Filtros -->
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <select class="form-control" ng-model="filtroEstado">
+                            <option value="">Todas las citas</option>
+                            <option value="pendiente">Pendientes</option>
+                            <option value="confirmada">Confirmadas</option>
+                            <option value="completada">Completadas</option>
+                            <option value="cancelada">Canceladas</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-outline-primary" ng-click="cargarCitas()">
+                            <i class="fas fa-sync"></i> Actualizar
+                        </button>
+                    </div>
+                </div>
+                
+                <div ng-if="cargandoCitas" class="text-center mb-3">
+                    <i class="fas fa-spinner fa-spin"></i> Cargando citas...
+                </div>
+                
+                <div ng-if="!cargandoCitas && citas.length === 0" class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> No tienes citas agendadas.
+                </div>
+                
+                <table class="table table-striped mt-3" ng-if="!cargandoCitas && citas.length > 0">
                     <thead>
                         <tr>
                             <th><i class="fas fa-user-md"></i> Médico</th>
                             <th><i class="fas fa-stethoscope"></i> Especialidad</th>
                             <th><i class="fas fa-calendar"></i> Fecha</th>
+                            <th><i class="fas fa-clock"></i> Hora</th>
+                            <th><i class="fas fa-file-medical"></i> Motivo</th>
+                            <th><i class="fas fa-info-circle"></i> Estado</th>
                             <th><i class="fas fa-cogs"></i> Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="cita in citas">
-                            <td>{{ cita.medico }}</td>
-                            <td>{{ cita.especialidad }}</td>
-                            <td>{{ cita.fecha }}</td>
+                        <tr ng-repeat="cita in citas | filter:filtroEstado">
+                            <td>{{ obtenerNombreMedico(cita.medico) }}</td>
+                            <td>{{ obtenerEspecialidadMedico(cita.medico) }}</td>
+                            <td>{{ cita.fecha | date:'dd/MM/yyyy' }}</td>
+                            <td>{{ cita.hora }}</td>
+                            <td>{{ cita.motivo | limitTo:50 }}{{ cita.motivo.length > 50 ? '...' : '' }}</td>
                             <td>
-                                <button class="btn btn-danger btn-sm" ng-click="cancelarCita($index)">
-                                    <i class="fas fa-trash"></i> Cancelar
+                                <span class="badge" ng-class="obtenerClaseEstado(cita.estado)">
+                                    {{ obtenerTextoEstado(cita.estado) }}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" ng-click="editarCita(cita)" 
+                                        ng-if="cita.estado === 'pendiente'">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                                <button class="btn btn-success btn-sm" ng-click="generarPDFCita(cita)" 
+                                        title="Generar PDF">
+                                    <i class="fas fa-file-pdf"></i> PDF
+                                </button>
+                                <button class="btn btn-danger btn-sm" ng-click="cancelarCita(cita._id)" 
+                                        ng-if="cita.estado !== 'cancelada' && cita.estado !== 'completada'">
+                                    <i class="fas fa-times"></i> Cancelar
+                                </button>
+                                <button class="btn btn-info btn-sm" ng-click="verDetalles(cita)">
+                                    <i class="fas fa-eye"></i> Ver
                                 </button>
                             </td>
                         </tr>
@@ -282,36 +537,743 @@
         </div>
     </footer>
     <!-- JS -->
+     <script src="js/auth.js"></script>
      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         angular.module('citasApp', [])
             .controller('CitasController', function ($scope) {
-                const STORAGE_KEY = 'misCitas';
+                // Verificar autenticación al cargar
+                if (!estaLogueado()) {
+                    alert('Debes iniciar sesión para ver tus citas');
+                    window.location.href = 'login.html';
+                    return;
+                }
 
-                $scope.citas = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+                // Mostrar elementos de usuario autenticado
+                document.getElementById('usuarioDropdown').classList.remove('d-none');
+                document.getElementById('historialLink').classList.remove('d-none');
+                
+                // Configurar información del usuario
+                obtenerPerfil().then(resultado => {
+                    if (resultado && resultado.success && resultado.usuario && resultado.usuario.nombre) {
+                        const nombreUsuarioElement = document.getElementById('nombreUsuario');
+                        if (nombreUsuarioElement) {
+                            nombreUsuarioElement.textContent = resultado.usuario.nombre;
+                        }
+                    }
+                }).catch(error => {
+                    console.error('Error al obtener perfil:', error);
+                });
+
+                $scope.citas = [];
+                $scope.medicos = [];
+                $scope.horasDisponibles = [];
+                $scope.horasDisponiblesEdicion = [];
+                $scope.cargandoCitas = false;
+                $scope.cargandoMedicos = false;
+                $scope.filtroEstado = '';
+                $scope.editandoCita = false;
+                $scope.citaEditando = null;
 
                 $scope.nuevaCita = {
                     medico: '',
-                    especialidad: '',
-                    fecha: ''
+                    fecha: '',
+                    hora: '',
+                    motivo: ''
                 };
 
-                $scope.agendarCita = function () {
-                    if ($scope.nuevaCita.medico && $scope.nuevaCita.fecha) {
-                        $scope.citas.push({
-                            ...$scope.nuevaCita
+                // Función para formatear hora
+                $scope.formatearHora = function(hora) {
+                    if (!hora || typeof hora !== 'string') {
+                        return 'Hora no especificada';
+                    }
+                    
+                    const partes = hora.split(':');
+                    if (partes.length !== 2) {
+                        return hora; // Retornar tal como está si no tiene el formato esperado
+                    }
+                    
+                    const [horas, minutos] = partes;
+                    const horaInt = parseInt(horas);
+                    const ampm = horaInt >= 12 ? 'PM' : 'AM';
+                    const hora12 = horaInt === 0 ? 12 : horaInt > 12 ? horaInt - 12 : horaInt;
+                    return `${hora12}:${minutos} ${ampm}`;
+                };
+
+                // Función para obtener días de la semana en español
+                $scope.obtenerDiaSemana = function(fecha) {
+                    if (!fecha) {
+                        console.log('No hay fecha proporcionada');
+                        return 'fecha_invalida';
+                    }
+                    
+                    const dias = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+                    try {
+                        console.log('Procesando fecha:', fecha, 'Tipo:', typeof fecha);
+                        
+                        // Crear fecha de manera más robusta
+                        let fechaObj;
+                        
+                        if (fecha instanceof Date) {
+                            // Ya es un objeto Date
+                            fechaObj = fecha;
+                        } else if (typeof fecha === 'string') {
+                            // Es un string, procesarlo
+                            if (fecha.includes('-')) {
+                                // Formato YYYY-MM-DD
+                                fechaObj = new Date(fecha + 'T12:00:00');
+                            } else {
+                                fechaObj = new Date(fecha);
+                            }
+                        } else {
+                            // Intentar convertir a Date
+                            fechaObj = new Date(fecha);
+                        }
+                        
+                        console.log('Objeto fecha creado:', fechaObj);
+                        
+                        if (isNaN(fechaObj.getTime())) {
+                            console.error('Fecha inválida después de conversión:', fecha);
+                            return 'fecha_invalida';
+                        }
+                        
+                        const diaSemana = fechaObj.getDay();
+                        const diaEnEspanol = dias[diaSemana];
+                        
+                        console.log('Índice del día:', diaSemana);
+                        console.log('Día en español:', diaEnEspanol);
+                        
+                        if (!diaEnEspanol) {
+                            console.error('No se pudo obtener el día en español para el índice:', diaSemana);
+                            return 'fecha_invalida';
+                        }
+                        
+                        return diaEnEspanol;
+                    } catch (error) {
+                        console.error('Error al procesar fecha:', error);
+                        return 'fecha_invalida';
+                    }
+                };
+
+                // Función para actualizar horarios cuando se selecciona un médico
+                $scope.actualizarHorarios = function() {
+                    console.log('=== ACTUALIZAR HORARIOS ===');
+                    console.log('Médico seleccionado:', $scope.nuevaCita.medico);
+                    console.log('Fecha seleccionada:', $scope.nuevaCita.fecha);
+                    
+                    $scope.nuevaCita.hora = ''; // Limpiar hora seleccionada
+                    
+                    if (!$scope.nuevaCita.medico) {
+                        $scope.horasDisponibles = [];
+                        return;
+                    }
+
+                    const medicoSeleccionado = $scope.medicos.find(m => m.nombre === $scope.nuevaCita.medico);
+                    console.log('Datos del médico encontrado:', medicoSeleccionado);
+                    
+                    if (medicoSeleccionado) {
+                        // Si hay una fecha seleccionada, verificar si el médico trabaja ese día
+                        if ($scope.nuevaCita.fecha) {
+                            const diaSemana = $scope.obtenerDiaSemana($scope.nuevaCita.fecha);
+                            console.log('Día de la semana calculado:', diaSemana);
+                            console.log('Días que trabaja el médico:', medicoSeleccionado.dias);
+                            console.log('¿El médico trabaja este día?', medicoSeleccionado.dias.includes(diaSemana));
+                            
+                            if (medicoSeleccionado.dias.includes(diaSemana)) {
+                                $scope.horasDisponibles = medicoSeleccionado.horas;
+                                console.log('Horas disponibles:', $scope.horasDisponibles);
+                            } else {
+                                $scope.horasDisponibles = [];
+                                console.log('No hay horas disponibles - médico no trabaja este día');
+                            }
+                        } else {
+                            $scope.horasDisponibles = medicoSeleccionado.horas;
+                            console.log('No hay fecha seleccionada, mostrando todas las horas:', $scope.horasDisponibles);
+                        }
+                    } else {
+                        $scope.horasDisponibles = [];
+                        console.log('No se encontró el médico');
+                    }
+                    console.log('=== FIN ACTUALIZAR HORARIOS ===');
+                };
+
+                // Función para actualizar horarios cuando se selecciona una fecha
+                $scope.actualizarHorariosPorFecha = function() {
+                    console.log('=== ACTUALIZAR HORARIOS POR FECHA ===');
+                    console.log('Fecha seleccionada:', $scope.nuevaCita.fecha);
+                    console.log('Médico seleccionado:', $scope.nuevaCita.medico);
+                    
+                    if (!$scope.nuevaCita.fecha || !$scope.nuevaCita.medico) {
+                        console.log('Faltan datos - fecha o médico no seleccionados');
+                        return;
+                    }
+
+                    const medicoSeleccionado = $scope.medicos.find(m => m.nombre === $scope.nuevaCita.medico);
+                    console.log('Datos del médico:', medicoSeleccionado);
+                    
+                    if (medicoSeleccionado) {
+                        const diaSemana = $scope.obtenerDiaSemana($scope.nuevaCita.fecha);
+                        console.log('Día de la semana:', diaSemana);
+                        console.log('Días que trabaja:', medicoSeleccionado.dias);
+                        console.log('¿Trabaja este día?', medicoSeleccionado.dias.includes(diaSemana));
+                        
+                        if (medicoSeleccionado.dias.includes(diaSemana)) {
+                            $scope.horasDisponibles = medicoSeleccionado.horas;
+                            console.log('Horas asignadas:', $scope.horasDisponibles);
+                        } else {
+                            $scope.horasDisponibles = [];
+                            $scope.nuevaCita.hora = '';
+                            console.log('No trabaja este día - limpiando horas');
+                            alert(`El ${medicoSeleccionado.nombre} no trabaja los ${diaSemana}s. Horario: ${medicoSeleccionado.horario}`);
+                        }
+                    }
+                    console.log('=== FIN ACTUALIZAR HORARIOS POR FECHA ===');
+                };
+
+                // Funciones para edición de citas
+                $scope.editarCita = function(cita) {
+                    $scope.editandoCita = true;
+                    
+                    // Formatear fecha correctamente para el input date
+                    let fechaFormateada = '';
+                    try {
+                        if (cita.fecha) {
+                            const fechaObj = new Date(cita.fecha);
+                            if (!isNaN(fechaObj.getTime())) {
+                                // Formatear como YYYY-MM-DD para el input date
+                                fechaFormateada = fechaObj.toISOString().split('T')[0];
+                            } else {
+                                console.error('Fecha inválida:', cita.fecha);
+                                fechaFormateada = new Date().toISOString().split('T')[0]; // Usar fecha actual como fallback
+                            }
+                        } else {
+                            fechaFormateada = new Date().toISOString().split('T')[0]; // Usar fecha actual como fallback
+                        }
+                    } catch (error) {
+                        console.error('Error al formatear fecha para edición:', error);
+                        fechaFormateada = new Date().toISOString().split('T')[0]; // Usar fecha actual como fallback
+                    }
+                    
+                    $scope.citaEditando = {
+                        _id: cita._id,
+                        medico: cita.medico,
+                        fecha: fechaFormateada,
+                        hora: cita.hora,
+                        motivo: cita.motivo
+                    };
+                    $scope.actualizarHorariosEdicion();
+                };
+
+                $scope.cancelarEdicion = function() {
+                    $scope.editandoCita = false;
+                    $scope.citaEditando = null;
+                    $scope.horasDisponiblesEdicion = [];
+                };
+
+                // Función para actualizar horarios cuando se selecciona un médico en edición
+                $scope.actualizarHorariosEdicion = function() {
+                    const horaOriginal = $scope.citaEditando.hora; // Guardar hora original
+                    
+                    if (!$scope.citaEditando.medico) {
+                        $scope.horasDisponiblesEdicion = [];
+                        return;
+                    }
+
+                    const medicoSeleccionado = $scope.medicos.find(m => m.nombre === $scope.citaEditando.medico);
+                    
+                    if (medicoSeleccionado) {
+                        // Si hay una fecha seleccionada, verificar si el médico trabaja ese día
+                        if ($scope.citaEditando.fecha) {
+                            const diaSemana = $scope.obtenerDiaSemana($scope.citaEditando.fecha);
+                            if (medicoSeleccionado.dias.includes(diaSemana)) {
+                                $scope.horasDisponiblesEdicion = medicoSeleccionado.horas;
+                                // Mantener la hora original si está disponible
+                                if (medicoSeleccionado.horas.includes(horaOriginal)) {
+                                    $scope.citaEditando.hora = horaOriginal;
+                                } else {
+                                    $scope.citaEditando.hora = '';
+                                }
+                            } else {
+                                $scope.horasDisponiblesEdicion = [];
+                                $scope.citaEditando.hora = '';
+                            }
+                        } else {
+                            $scope.horasDisponiblesEdicion = medicoSeleccionado.horas;
+                            // Mantener la hora original si está disponible
+                            if (medicoSeleccionado.horas.includes(horaOriginal)) {
+                                $scope.citaEditando.hora = horaOriginal;
+                            } else {
+                                $scope.citaEditando.hora = '';
+                            }
+                        }
+                    } else {
+                        $scope.horasDisponiblesEdicion = [];
+                        $scope.citaEditando.hora = '';
+                    }
+                };
+
+                // Función para actualizar horarios cuando se selecciona una fecha en edición
+                $scope.actualizarHorariosPorFechaEdicion = function() {
+                    if (!$scope.citaEditando.fecha || !$scope.citaEditando.medico) {
+                        return;
+                    }
+
+                    const medicoSeleccionado = $scope.medicos.find(m => m.nombre === $scope.citaEditando.medico);
+                    if (medicoSeleccionado) {
+                        const diaSemana = $scope.obtenerDiaSemana($scope.citaEditando.fecha);
+                        if (medicoSeleccionado.dias.includes(diaSemana)) {
+                            $scope.horasDisponiblesEdicion = medicoSeleccionado.horas;
+                        } else {
+                            $scope.horasDisponiblesEdicion = [];
+                            $scope.citaEditando.hora = '';
+                            alert(`El ${medicoSeleccionado.nombre} no trabaja los ${diaSemana}s. Horario: ${medicoSeleccionado.horario}`);
+                        }
+                    }
+                };
+
+                $scope.guardarEdicionCita = function() {
+                    if (!$scope.citaEditando.medico || !$scope.citaEditando.fecha || !$scope.citaEditando.hora || !$scope.citaEditando.motivo) {
+                        alert('Por favor complete todos los campos');
+                        return;
+                    }
+
+                    // Validar que la fecha y hora sean válidas para el médico
+                    const medicoSeleccionado = $scope.medicos.find(m => m.nombre === $scope.citaEditando.medico);
+                    if (medicoSeleccionado) {
+                        const diaSemana = $scope.obtenerDiaSemana($scope.citaEditando.fecha);
+                        if (!medicoSeleccionado.dias.includes(diaSemana)) {
+                            alert(`El ${medicoSeleccionado.nombre} no trabaja los ${diaSemana}s. Horario: ${medicoSeleccionado.horario}`);
+                            return;
+                        }
+                        
+                        if (!medicoSeleccionado.horas.includes($scope.citaEditando.hora)) {
+                            alert(`La hora ${$scope.formatearHora($scope.citaEditando.hora)} no está disponible para este médico`);
+                            return;
+                        }
+                    }
+
+                    // Preparar datos para la API
+                    const datosParaAPI = {
+                        medico: $scope.citaEditando.medico,
+                        fecha: $scope.citaEditando.fecha,
+                        hora: $scope.citaEditando.hora,
+                        motivo: $scope.citaEditando.motivo
+                    };
+
+                    editarCita($scope.citaEditando._id, datosParaAPI)
+                        .then(resultado => {
+                            if (resultado.success) {
+                                // Preguntar si quiere generar PDF
+                                const generarPDF = confirm('Cita actualizada exitosamente. ¿Desea generar un PDF con los datos actualizados de la cita?');
+                                
+                                if (generarPDF) {
+                                    // Generar PDF con los datos actualizados
+                                    const citaParaPDF = {
+                                        medico: $scope.citaEditando.medico,
+                                        fecha: $scope.citaEditando.fecha,
+                                        hora: $scope.citaEditando.hora,
+                                        motivo: $scope.citaEditando.motivo
+                                    };
+                                    $scope.generarPDFCita(citaParaPDF, true);
+                                }
+                                
+                                $scope.cancelarEdicion();
+                                $scope.cargarCitas(); // Recargar la lista
+                            } else {
+                                alert('Error al actualizar cita: ' + resultado.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Error al conectar con el servidor');
                         });
-                        localStorage.setItem(STORAGE_KEY, JSON.stringify($scope.citas));
-                        $scope.nuevaCita = {};
+                };
+
+                // Cargar médicos desde JSON local
+                $scope.cargarMedicos = function() {
+                    $scope.cargandoMedicos = true;
+                    
+                    fetch('js/medicos.json')
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            $scope.medicos = data;
+                            $scope.cargandoMedicos = false;
+                            $scope.$apply();
+                        })
+                        .catch(error => {
+                            console.error('Error al cargar médicos:', error);
+                            alert('Error al cargar médicos: ' + error.message);
+                            $scope.cargandoMedicos = false;
+                            $scope.$apply();
+                        });
+                };
+
+                // Cargar citas del usuario
+                $scope.cargarCitas = function() {
+                    $scope.cargandoCitas = true;
+                    
+                    obtenerCitas()
+                        .then(resultado => {
+                            if (resultado.success) {
+                                $scope.citas = resultado.citas;
+                            } else {
+                                alert('Error al cargar citas: ' + resultado.message);
+                            }
+                            $scope.cargandoCitas = false;
+                            $scope.$apply();
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Error al conectar con el servidor');
+                            $scope.cargandoCitas = false;
+                            $scope.$apply();
+                        });
+                };
+
+                // Agendar nueva cita
+                $scope.agendarCita = function() {
+                    if (!$scope.nuevaCita.medico || !$scope.nuevaCita.fecha || !$scope.nuevaCita.hora || !$scope.nuevaCita.motivo) {
+                        alert('Por favor complete todos los campos');
+                        return;
+                    }
+
+                    // Validar que la fecha y hora sean válidas para el médico
+                    const medicoSeleccionado = $scope.medicos.find(m => m.nombre === $scope.nuevaCita.medico);
+                    if (medicoSeleccionado) {
+                        const diaSemana = $scope.obtenerDiaSemana($scope.nuevaCita.fecha);
+                        if (!medicoSeleccionado.dias.includes(diaSemana)) {
+                            alert(`El ${medicoSeleccionado.nombre} no trabaja los ${diaSemana}s. Horario: ${medicoSeleccionado.horario}`);
+                            return;
+                        }
+                        
+                        if (!medicoSeleccionado.horas.includes($scope.nuevaCita.hora)) {
+                            alert(`La hora ${$scope.formatearHora($scope.nuevaCita.hora)} no está disponible para este médico`);
+                            return;
+                        }
+                    }
+
+                    // Preparar datos para la API (usando nombres en lugar de IDs)
+                    const datosParaAPI = {
+                        medico: $scope.nuevaCita.medico, // Nombre del médico
+                        fecha: $scope.nuevaCita.fecha,
+                        hora: $scope.nuevaCita.hora,
+                        motivo: $scope.nuevaCita.motivo
+                    };
+
+                    crearCita(datosParaAPI)
+                        .then(resultado => {
+                            if (resultado.success) {
+                                // Preguntar si quiere generar PDF
+                                const generarPDF = confirm('Cita agendada exitosamente. ¿Desea generar un PDF con los datos de la cita?');
+                                
+                                if (generarPDF) {
+                                    // Generar PDF con los datos de la cita
+                                    const citaParaPDF = {
+                                        medico: $scope.nuevaCita.medico,
+                                        fecha: $scope.nuevaCita.fecha,
+                                        hora: $scope.nuevaCita.hora,
+                                        motivo: $scope.nuevaCita.motivo
+                                    };
+                                    $scope.generarPDFCita(citaParaPDF, false);
+                                }
+                                
+                                $scope.nuevaCita = {
+                                    medico: '',
+                                    fecha: '',
+                                    hora: '',
+                                    motivo: ''
+                                };
+                                $scope.horasDisponibles = [];
+                                $scope.cargarCitas(); // Recargar la lista
+                            } else {
+                                alert('Error al agendar cita: ' + resultado.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Error al conectar con el servidor');
+                        });
+                };
+
+                // Cancelar cita
+                $scope.cancelarCita = function(idCita) {
+                    if (!confirm('¿Estás seguro de cancelar esta cita?')) {
+                        return;
+                    }
+
+                    cancelarCita(idCita)
+                        .then(resultado => {
+                            if (resultado.success) {
+                                alert('Cita cancelada exitosamente');
+                                $scope.cargarCitas(); // Recargar la lista
+                            } else {
+                                alert('Error al cancelar cita: ' + resultado.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Error al conectar con el servidor');
+                        });
+                };
+
+                // Obtener clase CSS para el estado
+                $scope.obtenerClaseEstado = function(estado) {
+                    switch(estado) {
+                        case 'pendiente': return 'bg-warning text-dark';
+                        case 'confirmada': return 'bg-info text-white';
+                        case 'completada': return 'bg-success text-white';
+                        case 'cancelada': return 'bg-danger text-white';
+                        default: return 'bg-secondary text-white';
                     }
                 };
 
-                $scope.cancelarCita = function (index) {
-                    if (confirm('¿Estás seguro de cancelar esta cita?')) {
-                        $scope.citas.splice(index, 1);
-                        localStorage.setItem(STORAGE_KEY, JSON.stringify($scope.citas));
+                // Obtener texto legible del estado
+                $scope.obtenerTextoEstado = function(estado) {
+                    switch(estado) {
+                        case 'pendiente': return 'Pendiente';
+                        case 'confirmada': return 'Confirmada';
+                        case 'completada': return 'Completada';
+                        case 'cancelada': return 'Cancelado';
+                        default: return 'Desconocido';
                     }
                 };
+
+                // Ver detalles de una cita
+                $scope.verDetalles = function(cita) {
+                    const doctorData = $scope.medicos.find(doc => doc.nombre === cita.medico);
+                    
+                    // Formatear fecha correctamente
+                    let fechaFormateada = 'Fecha no especificada';
+                    try {
+                        if (cita.fecha) {
+                            const fechaObj = new Date(cita.fecha);
+                            if (!isNaN(fechaObj.getTime())) {
+                                fechaFormateada = fechaObj.toLocaleDateString('es-ES', {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                });
+                            } else {
+                                fechaFormateada = 'Fecha inválida';
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error al formatear fecha en detalles:', error);
+                        fechaFormateada = 'Error en fecha';
+                    }
+                    
+                    const detalles = `
+                        Médico: ${cita.medico || 'No especificado'}
+                        Especialidad: ${doctorData?.especialidad || 'No especificado'}
+                        Fecha: ${fechaFormateada}
+                        Hora: ${$scope.formatearHora(cita.hora)}
+                        Motivo: ${cita.motivo}
+                        Estado: ${$scope.obtenerTextoEstado(cita.estado)}
+                        Horario del médico: ${doctorData?.horario || 'No especificado'}
+                    `;
+                    alert(detalles);
+                };
+
+                // Función para obtener el nombre del médico
+                $scope.obtenerNombreMedico = function(medico) {
+                    return medico || 'No especificado';
+                };
+
+                // Función para obtener la especialidad del médico
+                $scope.obtenerEspecialidadMedico = function(medico) {
+                    const doctorData = $scope.medicos.find(doc => doc.nombre === medico);
+                    return doctorData ? doctorData.especialidad : 'No especificado';
+                };
+
+                // Función para obtener el horario del médico
+                $scope.obtenerHorarioMedico = function(medico) {
+                    const doctorData = $scope.medicos.find(doc => doc.nombre === medico);
+                    return doctorData ? doctorData.horario : 'No especificado';
+                };
+
+                // Función para generar PDF de la cita
+                $scope.generarPDFCita = function(cita, esEdicion = false) {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+                    
+                    // Obtener información del médico
+                    const doctorData = $scope.medicos.find(medico => medico.nombre === cita.medico);
+                    const especialidad = doctorData ? doctorData.especialidad : 'No especificado';
+                    const horarioMedico = doctorData ? doctorData.horario : 'No especificado';
+                    
+                    // Obtener información del usuario
+                    const usuario = JSON.parse(localStorage.getItem('usuario'));
+                    const nombrePaciente = usuario ? usuario.nombre : 'No especificado';
+                    const emailPaciente = usuario ? usuario.email : 'No especificado';
+                    
+                    // Configurar el PDF
+                    doc.setFontSize(20);
+                    doc.setTextColor(0, 188, 212); // Color aqua
+                    doc.text('COMPROBANTE DE CITA MÉDICA', 105, 30, { align: 'center' });
+                    
+                    // Línea decorativa
+                    doc.setDrawColor(0, 188, 212);
+                    doc.setLineWidth(2);
+                    doc.line(20, 40, 190, 40);
+                    
+                    // Número de comprobante
+                    doc.setFontSize(10);
+                    doc.setTextColor(100, 100, 100);
+                    const numeroComprobante = `CMO-${new Date().getTime().toString().slice(-6)}`;
+                    doc.text(`Comprobante #: ${numeroComprobante}`, 20, 50);
+                    
+                    // Información del paciente
+                    doc.setFontSize(16);
+                    doc.setTextColor(0, 131, 143); // Color aqua oscuro
+                    doc.text('INFORMACIÓN DEL PACIENTE', 20, 70);
+                    
+                    doc.setFontSize(12);
+                    doc.setTextColor(0, 0, 0);
+                    doc.text(`Nombre: ${nombrePaciente}`, 20, 85);
+                    doc.text(`Email: ${emailPaciente}`, 20, 95);
+                    
+                    // Información del médico
+                    doc.setFontSize(16);
+                    doc.setTextColor(0, 131, 143);
+                    doc.text('INFORMACIÓN DEL MÉDICO', 20, 120);
+                    
+                    doc.setFontSize(12);
+                    doc.setTextColor(0, 0, 0);
+                    doc.text(`Médico: ${cita.medico}`, 20, 135);
+                    doc.text(`Especialidad: ${especialidad}`, 20, 145);
+                    doc.text(`Horario de atención: ${horarioMedico}`, 20, 155);
+                    
+                    // Información de la cita
+                    doc.setFontSize(16);
+                    doc.setTextColor(0, 131, 143);
+                    doc.text('DETALLES DE LA CITA', 20, 180);
+                    
+                    doc.setFontSize(12);
+                    doc.setTextColor(0, 0, 0);
+                    
+                    // Formatear fecha correctamente
+                    let fechaFormateada = 'Fecha no especificada';
+                    let fechaCita = null;
+                    
+                    try {
+                        if (cita.fecha) {
+                            console.log('Fecha recibida para PDF:', cita.fecha, 'Tipo:', typeof cita.fecha);
+                            
+                            // Manejar diferentes formatos de fecha de la base de datos
+                            if (typeof cita.fecha === 'string') {
+                                // Si la fecha viene como string ISO (2025-01-15T00:00:00.000Z)
+                                if (cita.fecha.includes('T')) {
+                                    fechaCita = new Date(cita.fecha);
+                                }
+                                // Si la fecha viene como string YYYY-MM-DD
+                                else if (cita.fecha.includes('-')) {
+                                    fechaCita = new Date(cita.fecha + 'T12:00:00');
+                                }
+                                // Si la fecha viene en otro formato
+                                else {
+                                    fechaCita = new Date(cita.fecha);
+                                }
+                            } else if (cita.fecha instanceof Date) {
+                                fechaCita = cita.fecha;
+                            } else {
+                                // Intentar convertir cualquier otro tipo
+                                fechaCita = new Date(cita.fecha);
+                            }
+                            
+                            console.log('Fecha procesada para PDF:', fechaCita);
+                            
+                            if (fechaCita && !isNaN(fechaCita.getTime())) {
+                                fechaFormateada = fechaCita.toLocaleDateString('es-ES', {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                });
+                                console.log('Fecha formateada para PDF:', fechaFormateada);
+                            } else {
+                                console.log('Fecha inválida en PDF');
+                                fechaFormateada = 'Fecha inválida';
+                            }
+                        } else {
+                            console.log('No hay fecha en la cita para PDF');
+                        }
+                    } catch (error) {
+                        console.error('Error al formatear fecha en PDF:', error);
+                        fechaFormateada = 'Error en fecha';
+                    }
+                    
+                    doc.text(`Fecha: ${fechaFormateada}`, 20, 195);
+                    doc.text(`Hora: ${$scope.formatearHora(cita.hora)}`, 20, 205);
+                    
+                    // Determinar el estado para mostrar en el PDF
+                    let estadoPDF = 'Agendada';
+                    if (esEdicion) {
+                        estadoPDF = 'Reagendada';
+                    } else if (cita.estado) {
+                        // Si la cita tiene estado, usar el texto legible del estado
+                        estadoPDF = $scope.obtenerTextoEstado(cita.estado);
+                    }
+                    
+                    doc.text(`Estado: ${estadoPDF}`, 20, 215);
+                    
+                    // Motivo de la consulta
+                    doc.setFontSize(16);
+                    doc.setTextColor(0, 131, 143);
+                    doc.text('MOTIVO DE LA CONSULTA', 20, 240);
+                    
+                    doc.setFontSize(12);
+                    doc.setTextColor(0, 0, 0);
+                    // Dividir el texto en líneas si es muy largo
+                    const motivoLineas = doc.splitTextToSize(cita.motivo, 160);
+                    doc.text(motivoLineas, 20, 255);
+                    
+                    // Información adicional
+                    const yPos = 255 + (motivoLineas.length * 10) + 20;
+                    doc.setFontSize(12);
+                    doc.setTextColor(0, 131, 143);
+                    doc.text('INFORMACIÓN IMPORTANTE', 20, yPos);
+                    
+                    doc.setFontSize(10);
+                    doc.setTextColor(0, 0, 0);
+                    doc.text('• Por favor llegue 15 minutos antes de su cita', 20, yPos + 15);
+                    doc.text('• Traiga su documento de identidad', 20, yPos + 25);
+                    doc.text('• En caso de no poder asistir, cancele con 24 horas de anticipación', 20, yPos + 35);
+                    doc.text('• Mantenga este comprobante como evidencia de su cita', 20, yPos + 45);
+                    
+                    // Pie de página
+                    doc.setFontSize(8);
+                    doc.setTextColor(0, 188, 212);
+                    doc.text('Consulta Médica Online - Tu salud es nuestra prioridad', 105, 280, { align: 'center' });
+                    doc.text(`Generado el: ${new Date().toLocaleDateString('es-ES')} a las ${new Date().toLocaleTimeString('es-ES')}`, 105, 285, { align: 'center' });
+                    
+                    // Descargar el PDF
+                    let nombreArchivo = 'cita-medica.pdf';
+                    try {
+                        // Usar la fecha procesada para el nombre del archivo
+                        const fechaArchivo = fechaCita && !isNaN(fechaCita.getTime()) ? 
+                            fechaCita.toISOString().split('T')[0] : 
+                            new Date().toISOString().split('T')[0];
+                        const nombreMedico = cita.medico ? cita.medico.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9\-]/g, '') : 'medico';
+                        nombreArchivo = `cita-${nombreMedico}-${fechaArchivo}.pdf`;
+                    } catch (error) {
+                        console.error('Error al generar nombre del archivo:', error);
+                    }
+                    
+                    doc.save(nombreArchivo);
+                };
+
+                // Configurar fecha mínima (hoy)
+                $scope.fechaMinima = new Date().toISOString().split('T')[0];
+
+                // Inicializar datos
+                $scope.cargarMedicos();
+                $scope.cargarCitas();
             });
     </script>
 </body>
