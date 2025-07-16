@@ -220,6 +220,242 @@
                 gap: 1.5rem;
             }
         }
+
+        /* Sistema de Alertas Personalizadas */
+        .custom-alert-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .custom-alert-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .custom-alert {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 188, 212, 0.3);
+            padding: 2rem;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            transform: scale(0.8);
+            transition: all 0.3s ease;
+            border: 3px solid var(--aqua-light);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .custom-alert-overlay.show .custom-alert {
+            transform: scale(1);
+        }
+
+        .custom-alert::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--aqua-light) 0%, transparent 70%);
+            opacity: 0.1;
+            z-index: 0;
+        }
+
+        .custom-alert-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .custom-alert-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .custom-alert-icon.success {
+            color: #28a745;
+        }
+
+        .custom-alert-icon.error {
+            color: #dc3545;
+        }
+
+        .custom-alert-icon.warning {
+            color: #ffc107;
+        }
+
+        .custom-alert-icon.info {
+            color: var(--aqua-primary);
+        }
+
+        .custom-alert-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--aqua-dark);
+        }
+
+        .custom-alert-message {
+            font-size: 1.1rem;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 2rem;
+        }
+
+        .custom-alert-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .custom-alert-btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.9rem;
+        }
+
+        .custom-alert-btn.primary {
+            background: var(--aqua-gradient);
+            color: white;
+        }
+
+        .custom-alert-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 188, 212, 0.4);
+        }
+
+        .custom-alert-btn.secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .custom-alert-btn.secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .custom-alert-btn.danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .custom-alert-btn.danger:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        /* Notificaciones Toast */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9998;
+        }
+
+        .custom-toast {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 188, 212, 0.2);
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            max-width: 400px;
+            transform: translateX(450px);
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--aqua-primary);
+        }
+
+        .custom-toast.show {
+            transform: translateX(0);
+        }
+
+        .custom-toast.success {
+            border-left-color: #28a745;
+        }
+
+        .custom-toast.error {
+            border-left-color: #dc3545;
+        }
+
+        .custom-toast.warning {
+            border-left-color: #ffc107;
+        }
+
+        .custom-toast-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .custom-toast-icon.success {
+            color: #28a745;
+        }
+
+        .custom-toast-icon.error {
+            color: #dc3545;
+        }
+
+        .custom-toast-icon.warning {
+            color: #ffc107;
+        }
+
+        .custom-toast-icon.info {
+            color: var(--aqua-primary);
+        }
+
+        .custom-toast-content {
+            flex: 1;
+        }
+
+        .custom-toast-title {
+            font-weight: 600;
+            color: var(--aqua-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .custom-toast-message {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .custom-toast-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: #999;
+            cursor: pointer;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .custom-toast-close:hover {
+            color: #666;
+        }
     </style>
 </head>
 
@@ -277,6 +513,21 @@
     <div class="floating-elements"></div>
     <div class="floating-elements"></div>
     
+    <!-- Sistema de Alertas Personalizadas -->
+    <div class="custom-alert-overlay" id="customAlertOverlay">
+        <div class="custom-alert">
+            <div class="custom-alert-content">
+                <i class="custom-alert-icon" id="customAlertIcon"></i>
+                <h4 class="custom-alert-title" id="customAlertTitle"></h4>
+                <p class="custom-alert-message" id="customAlertMessage"></p>
+                <div class="custom-alert-buttons" id="customAlertButtons"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor para Notificaciones Toast -->
+    <div class="toast-container" id="toastContainer"></div>
+    
     <!-- Contenido -->
     <div class="container mt-5">
         <div class="hero-section">
@@ -306,6 +557,7 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/custom-alerts.js"></script>
     <script src="js/auth.js"></script>
 </body>
 </html>
