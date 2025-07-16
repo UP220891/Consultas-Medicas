@@ -127,7 +127,7 @@ class CustomAlerts {
     }
 
     // Notificaciones Toast
-    toast(type, title, message, duration = 5000) {
+    toast(type, title, message, duration = 3000) {
         const toast = document.createElement('div');
         toast.className = `custom-toast ${type}`;
         
@@ -161,10 +161,10 @@ class CustomAlerts {
         // Agregar al contenedor
         this.toastContainer.appendChild(toast);
 
-        // Mostrar con animación
+        // Mostrar con animación más rápida
         setTimeout(() => {
             toast.classList.add('show');
-        }, 100);
+        }, 50);
 
         // Auto-remover después del tiempo especificado
         setTimeout(() => {
@@ -178,7 +178,7 @@ class CustomAlerts {
             if (toast.parentNode) {
                 toast.parentNode.removeChild(toast);
             }
-        }, 300);
+        }, 200);
     }
 }
 
@@ -203,7 +203,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 z-index: 9999;
                 opacity: 0;
                 visibility: hidden;
-                transition: all 0.3s ease;
+                transition: all 0.2s ease;
             }
 
             .custom-alert-overlay.show {
@@ -220,10 +220,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 width: 90%;
                 text-align: center;
                 transform: scale(0.8);
-                transition: all 0.3s ease;
+                transition: all 0.2s ease;
                 border: 3px solid #b2ebf2;
                 position: relative;
                 overflow: hidden;
+                backdrop-filter: blur(10px);
             }
 
             .custom-alert-overlay.show .custom-alert {
@@ -240,6 +241,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 background: radial-gradient(circle, #b2ebf2 0%, transparent 70%);
                 opacity: 0.1;
                 z-index: 0;
+                animation: pulse 2s infinite;
+            }
+
+            @keyframes pulse {
+                0% { transform: scale(1); opacity: 0.1; }
+                50% { transform: scale(1.05); opacity: 0.2; }
+                100% { transform: scale(1); opacity: 0.1; }
+            }
+
+            @keyframes slideIn {
+                from { transform: translateY(-50px) scale(0.8); opacity: 0; }
+                to { transform: translateY(0) scale(1); opacity: 1; }
+            }
+
+            .custom-alert-overlay.show .custom-alert {
+                animation: slideIn 0.3s ease-out;
             }
 
             .custom-alert-content {
@@ -251,22 +268,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 font-size: 4rem;
                 margin-bottom: 1rem;
                 display: block;
+                animation: iconBounce 0.6s ease-out;
+                filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+            }
+
+            @keyframes iconBounce {
+                0% { transform: scale(0) rotate(180deg); }
+                50% { transform: scale(1.2) rotate(10deg); }
+                100% { transform: scale(1) rotate(0deg); }
             }
 
             .custom-alert-icon.success {
                 color: #28a745;
+                text-shadow: 0 0 20px rgba(40, 167, 69, 0.5);
             }
 
             .custom-alert-icon.error {
                 color: #dc3545;
+                text-shadow: 0 0 20px rgba(220, 53, 69, 0.5);
             }
 
             .custom-alert-icon.warning {
                 color: #ffc107;
+                text-shadow: 0 0 20px rgba(255, 193, 7, 0.5);
             }
 
             .custom-alert-icon.info {
                 color: #00bcd4;
+                text-shadow: 0 0 20px rgba(0, 188, 212, 0.5);
             }
 
             .custom-alert-title {
@@ -296,40 +325,64 @@ document.addEventListener('DOMContentLoaded', function() {
                 border-radius: 50px;
                 font-weight: 600;
                 cursor: pointer;
-                transition: all 0.3s ease;
+                transition: all 0.2s ease;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
                 font-size: 0.9rem;
+                position: relative;
+                overflow: hidden;
+                min-width: 120px;
+            }
+
+            .custom-alert-btn::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+                transition: left 0.5s;
+            }
+
+            .custom-alert-btn:hover::before {
+                left: 100%;
             }
 
             .custom-alert-btn.primary {
                 background: linear-gradient(135deg, #00bcd4, #4dd0e1);
                 color: white;
+                box-shadow: 0 4px 15px rgba(0, 188, 212, 0.3);
             }
 
             .custom-alert-btn.primary:hover {
                 transform: translateY(-2px);
-                box-shadow: 0 5px 15px rgba(0, 188, 212, 0.4);
+                box-shadow: 0 8px 25px rgba(0, 188, 212, 0.4);
+                background: linear-gradient(135deg, #00acc1, #26c6da);
             }
 
             .custom-alert-btn.secondary {
-                background: #6c757d;
+                background: linear-gradient(135deg, #6c757d, #868e96);
                 color: white;
+                box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
             }
 
             .custom-alert-btn.secondary:hover {
-                background: #5a6268;
+                background: linear-gradient(135deg, #5a6268, #6c757d);
                 transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
             }
 
             .custom-alert-btn.danger {
-                background: #dc3545;
+                background: linear-gradient(135deg, #dc3545, #e74c3c);
                 color: white;
+                box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
             }
 
             .custom-alert-btn.danger:hover {
-                background: #c82333;
+                background: linear-gradient(135deg, #c82333, #dc3545);
                 transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
             }
 
             /* Notificaciones Toast */
@@ -351,45 +404,95 @@ document.addEventListener('DOMContentLoaded', function() {
                 gap: 1rem;
                 max-width: 400px;
                 transform: translateX(450px);
-                transition: all 0.3s ease;
+                transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
                 border-left: 4px solid #00bcd4;
+                backdrop-filter: blur(10px);
+                position: relative;
+                overflow: hidden;
+            }
+
+            .custom-toast::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background: linear-gradient(90deg, #00bcd4, #4dd0e1);
+                transform: scaleX(0);
+                transform-origin: left;
+                transition: transform 0.3s ease;
+            }
+
+            .custom-toast.show::before {
+                transform: scaleX(1);
             }
 
             .custom-toast.show {
                 transform: translateX(0);
+                animation: toastSlide 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            }
+
+            @keyframes toastSlide {
+                0% { transform: translateX(450px) scale(0.8); opacity: 0; }
+                100% { transform: translateX(0) scale(1); opacity: 1; }
             }
 
             .custom-toast.success {
                 border-left-color: #28a745;
             }
 
+            .custom-toast.success::before {
+                background: linear-gradient(90deg, #28a745, #34ce57);
+            }
+
             .custom-toast.error {
                 border-left-color: #dc3545;
+            }
+
+            .custom-toast.error::before {
+                background: linear-gradient(90deg, #dc3545, #e74c3c);
             }
 
             .custom-toast.warning {
                 border-left-color: #ffc107;
             }
 
+            .custom-toast.warning::before {
+                background: linear-gradient(90deg, #ffc107, #ffcd39);
+            }
+
             .custom-toast-icon {
                 font-size: 1.5rem;
                 flex-shrink: 0;
+                animation: toastIconPulse 2s infinite;
+                filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+            }
+
+            @keyframes toastIconPulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+                100% { transform: scale(1); }
             }
 
             .custom-toast-icon.success {
                 color: #28a745;
+                text-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
             }
 
             .custom-toast-icon.error {
                 color: #dc3545;
+                text-shadow: 0 0 10px rgba(220, 53, 69, 0.3);
             }
 
             .custom-toast-icon.warning {
                 color: #ffc107;
+                text-shadow: 0 0 10px rgba(255, 193, 7, 0.3);
             }
 
             .custom-toast-icon.info {
                 color: #00bcd4;
+                text-shadow: 0 0 10px rgba(0, 188, 212, 0.3);
             }
 
             .custom-toast-content {
@@ -446,24 +549,31 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Inicializar sistema de alertas
-    const customAlerts = new CustomAlerts();
+    window.customAlerts = new CustomAlerts();
 
     // Funciones globales para usar en toda la aplicación
     window.showAlert = (type, title, message, buttons) => {
-        customAlerts.show(type, title, message, buttons);
+        window.customAlerts.show(type, title, message, buttons);
     };
 
     window.showConfirm = (title, message, onConfirm, onCancel) => {
-        customAlerts.confirm(title, message, onConfirm, onCancel);
+        window.customAlerts.confirm(title, message, onConfirm, onCancel);
     };
 
     window.showToast = (type, title, message, duration) => {
-        customAlerts.toast(type, title, message, duration);
+        window.customAlerts.toast(type, title, message, duration);
     };
 
+    // Mantener el alert original como backup
+    window.originalAlert = window.alert;
+    
     // Sobrescribir alert nativo para usar el sistema personalizado
     window.alert = (message) => {
-        customAlerts.show('info', 'Información', message);
+        if (typeof message === 'string') {
+            window.customAlerts.show('info', 'Información', message);
+        } else {
+            window.originalAlert(message);
+        }
     };
 
     // Guardar el confirm original para casos especiales
@@ -471,10 +581,45 @@ document.addEventListener('DOMContentLoaded', function() {
     
     window.confirm = (message) => {
         return new Promise((resolve) => {
-            customAlerts.confirm('Confirmación', message, 
+            window.customAlerts.confirm('Confirmación', message, 
                 () => resolve(true), 
                 () => resolve(false)
             );
         });
     };
 });
+
+// Función de inicialización alternativa para casos donde DOMContentLoaded ya pasó
+function initCustomAlerts() {
+    if (!window.customAlerts) {
+        window.customAlerts = new CustomAlerts();
+        
+        window.showAlert = (type, title, message, buttons) => {
+            window.customAlerts.show(type, title, message, buttons);
+        };
+
+        window.showConfirm = (title, message, onConfirm, onCancel) => {
+            window.customAlerts.confirm(title, message, onConfirm, onCancel);
+        };
+
+        window.showToast = (type, title, message, duration) => {
+            window.customAlerts.toast(type, title, message, duration);
+        };
+
+        // Función de demostración para probar las alertas
+        window.testAlerts = () => {
+            // Probar diferentes tipos de alertas
+            setTimeout(() => showToast('success', 'Éxito', 'Operación completada exitosamente'), 500);
+            setTimeout(() => showToast('info', 'Información', 'Datos actualizados'), 1000);
+            setTimeout(() => showToast('warning', 'Advertencia', 'Revise los datos ingresados'), 1500);
+            setTimeout(() => showToast('error', 'Error', 'No se pudo completar la operación'), 2000);
+        };
+    }
+}
+
+// Inicializar inmediatamente si el DOM ya está cargado
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCustomAlerts);
+} else {
+    initCustomAlerts();
+}

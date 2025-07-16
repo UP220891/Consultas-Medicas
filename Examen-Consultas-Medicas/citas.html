@@ -613,7 +613,7 @@
                         return 'fecha_invalida';
                     }
                     
-                    const dias = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+                    const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
                     try {
                         console.log('Procesando fecha:', fecha, 'Tipo:', typeof fecha);
                         
@@ -730,7 +730,7 @@
                             $scope.horasDisponibles = [];
                             $scope.nuevaCita.hora = '';
                             console.log('No trabaja este día - limpiando horas');
-                            alert(`El ${medicoSeleccionado.nombre} no trabaja los ${diaSemana}s. Horario: ${medicoSeleccionado.horario}`);
+                            showAlert('warning', 'Horario no disponible', `El ${medicoSeleccionado.nombre} no trabaja los ${diaSemana}. Horario: ${medicoSeleccionado.horario}`);
                         }
                     }
                     console.log('=== FIN ACTUALIZAR HORARIOS POR FECHA ===');
@@ -832,7 +832,7 @@
                         } else {
                             $scope.horasDisponiblesEdicion = [];
                             $scope.citaEditando.hora = '';
-                            alert(`El ${medicoSeleccionado.nombre} no trabaja los ${diaSemana}s. Horario: ${medicoSeleccionado.horario}`);
+                            showAlert('warning', 'Horario no disponible', `El ${medicoSeleccionado.nombre} no trabaja los ${diaSemana}. Horario: ${medicoSeleccionado.horario}`);
                         }
                     }
                 };
@@ -848,12 +848,12 @@
                     if (medicoSeleccionado) {
                         const diaSemana = $scope.obtenerDiaSemana($scope.citaEditando.fecha);
                         if (!medicoSeleccionado.dias.includes(diaSemana)) {
-                            alert(`El ${medicoSeleccionado.nombre} no trabaja los ${diaSemana}s. Horario: ${medicoSeleccionado.horario}`);
+                            showAlert('warning', 'Horario no disponible', `El ${medicoSeleccionado.nombre} no trabaja los ${diaSemana}. Horario: ${medicoSeleccionado.horario}`);
                             return;
                         }
                         
                         if (!medicoSeleccionado.horas.includes($scope.citaEditando.hora)) {
-                            alert(`La hora ${$scope.formatearHora($scope.citaEditando.hora)} no está disponible para este médico`);
+                            showAlert('warning', 'Hora no disponible', `La hora ${$scope.formatearHora($scope.citaEditando.hora)} no está disponible para este médico`);
                             return;
                         }
                     }
@@ -869,29 +869,37 @@
                     editarCita($scope.citaEditando._id, datosParaAPI)
                         .then(resultado => {
                             if (resultado.success) {
-                                // Preguntar si quiere generar PDF
-                                const generarPDF = confirm('Cita actualizada exitosamente. ¿Desea generar un PDF con los datos actualizados de la cita?');
+                                // Mostrar alerta de éxito y preguntar si quiere generar PDF
+                                showToast('success', 'Éxito', 'Cita actualizada exitosamente');
                                 
-                                if (generarPDF) {
-                                    // Generar PDF con los datos actualizados
-                                    const citaParaPDF = {
-                                        medico: $scope.citaEditando.medico,
-                                        fecha: $scope.citaEditando.fecha,
-                                        hora: $scope.citaEditando.hora,
-                                        motivo: $scope.citaEditando.motivo
-                                    };
-                                    $scope.generarPDFCita(citaParaPDF, true);
-                                }
+                                showConfirm(
+                                    'Generar PDF',
+                                    '¿Desea generar un PDF con los datos actualizados de la cita?',
+                                    () => {
+                                        // Generar PDF con los datos actualizados
+                                        const citaParaPDF = {
+                                            medico: $scope.citaEditando.medico,
+                                            fecha: $scope.citaEditando.fecha,
+                                            hora: $scope.citaEditando.hora,
+                                            motivo: $scope.citaEditando.motivo
+                                        };
+                                        $scope.generarPDFCita(citaParaPDF, true);
+                                    },
+                                    () => {
+                                        // No generar PDF
+                                        console.log('PDF no generado');
+                                    }
+                                );
                                 
                                 $scope.cancelarEdicion();
                                 $scope.cargarCitas(); // Recargar la lista
                             } else {
-                                alert('Error al actualizar cita: ' + resultado.message);
+                                showAlert('error', 'Error', 'Error al actualizar cita: ' + resultado.message);
                             }
                         })
                         .catch(error => {
                             console.error('Error:', error);
-                            alert('Error al conectar con el servidor');
+                            showAlert('error', 'Error de Conexión', 'Error al conectar con el servidor');
                         });
                 };
 
@@ -913,7 +921,7 @@
                         })
                         .catch(error => {
                             console.error('Error al cargar médicos:', error);
-                            alert('Error al cargar médicos: ' + error.message);
+                            showAlert('error', 'Error al cargar médicos', 'Error al cargar médicos: ' + error.message);
                             $scope.cargandoMedicos = false;
                             $scope.$apply();
                         });
@@ -928,14 +936,14 @@
                             if (resultado.success) {
                                 $scope.citas = resultado.citas;
                             } else {
-                                alert('Error al cargar citas: ' + resultado.message);
+                                showAlert('error', 'Error al cargar citas', 'Error al cargar citas: ' + resultado.message);
                             }
                             $scope.cargandoCitas = false;
                             $scope.$apply();
                         })
                         .catch(error => {
                             console.error('Error:', error);
-                            alert('Error al conectar con el servidor');
+                            showAlert('error', 'Error de Conexión', 'Error al conectar con el servidor');
                             $scope.cargandoCitas = false;
                             $scope.$apply();
                         });
@@ -953,12 +961,12 @@
                     if (medicoSeleccionado) {
                         const diaSemana = $scope.obtenerDiaSemana($scope.nuevaCita.fecha);
                         if (!medicoSeleccionado.dias.includes(diaSemana)) {
-                            alert(`El ${medicoSeleccionado.nombre} no trabaja los ${diaSemana}s. Horario: ${medicoSeleccionado.horario}`);
+                            showAlert('warning', 'Horario no disponible', `El ${medicoSeleccionado.nombre} no trabaja los ${diaSemana}. Horario: ${medicoSeleccionado.horario}`);
                             return;
                         }
                         
                         if (!medicoSeleccionado.horas.includes($scope.nuevaCita.hora)) {
-                            alert(`La hora ${$scope.formatearHora($scope.nuevaCita.hora)} no está disponible para este médico`);
+                            showAlert('warning', 'Hora no disponible', `La hora ${$scope.formatearHora($scope.nuevaCita.hora)} no está disponible para este médico`);
                             return;
                         }
                     }
@@ -974,19 +982,27 @@
                     crearCita(datosParaAPI)
                         .then(resultado => {
                             if (resultado.success) {
-                                // Preguntar si quiere generar PDF
-                                const generarPDF = confirm('Cita agendada exitosamente. ¿Desea generar un PDF con los datos de la cita?');
+                                // Mostrar alerta de éxito y preguntar si quiere generar PDF
+                                showToast('success', 'Éxito', 'Cita agendada exitosamente');
                                 
-                                if (generarPDF) {
-                                    // Generar PDF con los datos de la cita
-                                    const citaParaPDF = {
-                                        medico: $scope.nuevaCita.medico,
-                                        fecha: $scope.nuevaCita.fecha,
-                                        hora: $scope.nuevaCita.hora,
-                                        motivo: $scope.nuevaCita.motivo
-                                    };
-                                    $scope.generarPDFCita(citaParaPDF, false);
-                                }
+                                showConfirm(
+                                    'Generar PDF',
+                                    '¿Desea generar un PDF con los datos de la cita?',
+                                    () => {
+                                        // Generar PDF con los datos de la cita
+                                        const citaParaPDF = {
+                                            medico: $scope.nuevaCita.medico,
+                                            fecha: $scope.nuevaCita.fecha,
+                                            hora: $scope.nuevaCita.hora,
+                                            motivo: $scope.nuevaCita.motivo
+                                        };
+                                        $scope.generarPDFCita(citaParaPDF, false);
+                                    },
+                                    () => {
+                                        // No generar PDF
+                                        console.log('PDF no generado');
+                                    }
+                                );
                                 
                                 $scope.nuevaCita = {
                                     medico: '',
@@ -997,12 +1013,12 @@
                                 $scope.horasDisponibles = [];
                                 $scope.cargarCitas(); // Recargar la lista
                             } else {
-                                alert('Error al agendar cita: ' + resultado.message);
+                                showAlert('error', 'Error al agendar cita', 'Error al agendar cita: ' + resultado.message);
                             }
                         })
                         .catch(error => {
                             console.error('Error:', error);
-                            alert('Error al conectar con el servidor');
+                            showAlert('error', 'Error de Conexión', 'Error al conectar con el servidor');
                         });
                 };
 
@@ -1084,7 +1100,7 @@
                         Estado: ${$scope.obtenerTextoEstado(cita.estado)}
                         Horario del médico: ${doctorData?.horario || 'No especificado'}
                     `;
-                    alert(detalles);
+                    showAlert('info', 'Detalles de la Cita', detalles);
                 };
 
                 // Función para obtener el nombre del médico
@@ -1096,7 +1112,7 @@
                 $scope.obtenerEspecialidadMedico = function(medico) {
                     const doctorData = $scope.medicos.find(doc => doc.nombre === medico);
                     return doctorData ? doctorData.especialidad : 'No especificado';
-                };
+                };{}
 
                 // Función para obtener el horario del médico
                 $scope.obtenerHorarioMedico = function(medico) {
