@@ -869,6 +869,18 @@
                     editarCita($scope.citaEditando._id, datosParaAPI)
                         .then(resultado => {
                             if (resultado.success) {
+                                // Guardar datos de la cita antes de cancelar la edición
+                                const datosParaPDF = {
+                                    medico: $scope.citaEditando.medico,
+                                    fecha: $scope.citaEditando.fecha,
+                                    hora: $scope.citaEditando.hora,
+                                    motivo: $scope.citaEditando.motivo
+                                };
+                                
+                                // Limpiar edición inmediatamente
+                                $scope.cancelarEdicion();
+                                $scope.cargarCitas(); // Recargar la lista
+                                
                                 // Mostrar alerta de éxito y preguntar si quiere generar PDF
                                 showToast('success', 'Éxito', 'Cita actualizada exitosamente');
                                 
@@ -876,23 +888,14 @@
                                     'Generar PDF',
                                     '¿Desea generar un PDF con los datos actualizados de la cita?',
                                     () => {
-                                        // Generar PDF con los datos actualizados
-                                        const citaParaPDF = {
-                                            medico: $scope.citaEditando.medico,
-                                            fecha: $scope.citaEditando.fecha,
-                                            hora: $scope.citaEditando.hora,
-                                            motivo: $scope.citaEditando.motivo
-                                        };
-                                        $scope.generarPDFCita(citaParaPDF, true);
+                                        // Generar PDF con los datos guardados
+                                        $scope.generarPDFCita(datosParaPDF, true);
                                     },
                                     () => {
                                         // No generar PDF
                                         console.log('PDF no generado');
                                     }
                                 );
-                                
-                                $scope.cancelarEdicion();
-                                $scope.cargarCitas(); // Recargar la lista
                             } else {
                                 showAlert('error', 'Error', 'Error al actualizar cita: ' + resultado.message);
                             }
@@ -982,28 +985,15 @@
                     crearCita(datosParaAPI)
                         .then(resultado => {
                             if (resultado.success) {
-                                // Mostrar alerta de éxito y preguntar si quiere generar PDF
-                                showToast('success', 'Éxito', 'Cita agendada exitosamente');
+                                // Guardar datos de la cita antes de limpiar el formulario
+                                const datosParaPDF = {
+                                    medico: $scope.nuevaCita.medico,
+                                    fecha: $scope.nuevaCita.fecha,
+                                    hora: $scope.nuevaCita.hora,
+                                    motivo: $scope.nuevaCita.motivo
+                                };
                                 
-                                showConfirm(
-                                    'Generar PDF',
-                                    '¿Desea generar un PDF con los datos de la cita?',
-                                    () => {
-                                        // Generar PDF con los datos de la cita
-                                        const citaParaPDF = {
-                                            medico: $scope.nuevaCita.medico,
-                                            fecha: $scope.nuevaCita.fecha,
-                                            hora: $scope.nuevaCita.hora,
-                                            motivo: $scope.nuevaCita.motivo
-                                        };
-                                        $scope.generarPDFCita(citaParaPDF, false);
-                                    },
-                                    () => {
-                                        // No generar PDF
-                                        console.log('PDF no generado');
-                                    }
-                                );
-                                
+                                // Limpiar formulario inmediatamente
                                 $scope.nuevaCita = {
                                     medico: '',
                                     fecha: '',
@@ -1012,6 +1002,22 @@
                                 };
                                 $scope.horasDisponibles = [];
                                 $scope.cargarCitas(); // Recargar la lista
+                                
+                                // Mostrar alerta de éxito y preguntar si quiere generar PDF
+                                showToast('success', 'Éxito', 'Cita agendada exitosamente');
+                                
+                                showConfirm(
+                                    'Generar PDF',
+                                    '¿Desea generar un PDF con los datos de la cita?',
+                                    () => {
+                                        // Generar PDF con los datos guardados
+                                        $scope.generarPDFCita(datosParaPDF, false);
+                                    },
+                                    () => {
+                                        // No generar PDF
+                                        console.log('PDF no generado');
+                                    }
+                                );
                             } else {
                                 showAlert('error', 'Error al agendar cita', 'Error al agendar cita: ' + resultado.message);
                             }
@@ -1122,16 +1128,43 @@
 
                 // Función para generar PDF de la cita
                 $scope.generarPDFCita = function(cita, esEdicion = false) {
+                    console.log('=== GENERANDO PDF ===');
+                    console.log('Datos de la cita recibidos:', cita);
+                    console.log('Es edición:', esEdicion);
+                    
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF();
                     
+                    // Verificar que los datos estén presentes
+                    if (!cita) {
+                        console.error('No se recibieron datos de la cita');
+                        showAlert('error', 'Error PDF', 'No se pueden generar el PDF sin datos de la cita');
+                        return;
+                    }
+                    
+                    // Verificar que los médicos estén cargados
+                    if (!$scope.medicos || $scope.medicos.length === 0) {
+                        console.error('Los médicos no están cargados');
+                        showAlert('error', 'Error PDF', 'Los datos de médicos no están disponibles. Por favor, recarga la página.');
+                        return;
+                    }
+                    
                     // Obtener información del médico
-                    const doctorData = $scope.medicos.find(medico => medico.nombre === cita.medico);
+                    console.log('Array de médicos disponible:', $scope.medicos);
+                    console.log('Nombre del médico a buscar:', cita.medico);
+                    console.log('Tipo de nombre del médico:', typeof cita.medico);
+                    
+                    const doctorData = $scope.medicos.find(medico => {
+                        console.log('Comparando:', medico.nombre, 'con', cita.medico);
+                        return medico.nombre === cita.medico;
+                    });
+                    console.log('Datos del médico encontrados:', doctorData);
                     const especialidad = doctorData ? doctorData.especialidad : 'No especificado';
                     const horarioMedico = doctorData ? doctorData.horario : 'No especificado';
                     
                     // Obtener información del usuario
                     const usuario = JSON.parse(localStorage.getItem('usuario'));
+                    console.log('Datos del usuario:', usuario);
                     const nombrePaciente = usuario ? usuario.nombre : 'No especificado';
                     const emailPaciente = usuario ? usuario.email : 'No especificado';
                     
@@ -1250,6 +1283,8 @@
                     let fechaFormateada = 'Fecha no especificada';
                     let fechaCita = null;
                     
+                    console.log('Fecha original de la cita:', cita.fecha);
+                    
                     try {
                         if (cita.fecha) {
                             // Manejar diferentes formatos de fecha de la base de datos
@@ -1267,6 +1302,8 @@
                                 fechaCita = new Date(cita.fecha);
                             }
                             
+                            console.log('Fecha procesada:', fechaCita);
+                            
                             if (fechaCita && !isNaN(fechaCita.getTime())) {
                                 fechaFormateada = fechaCita.toLocaleDateString('es-ES', {
                                     weekday: 'long',
@@ -1274,8 +1311,10 @@
                                     month: 'long',
                                     day: 'numeric'
                                 });
+                                console.log('Fecha formateada:', fechaFormateada);
                             } else {
                                 fechaFormateada = 'Fecha inválida';
+                                console.error('Fecha inválida después de procesamiento');
                             }
                         }
                     } catch (error) {
@@ -1328,8 +1367,12 @@
                     // Sección: Motivo de la consulta
                     yPos = crearSeccion('MOTIVO DE LA CONSULTA', yPos);
                     
+                    // Verificar que el motivo esté presente
+                    const motivoTexto = cita.motivo || 'No especificado';
+                    console.log('Motivo de la cita:', motivoTexto);
+                    
                     // Crear caja para el motivo
-                    const motivoLineas = doc.splitTextToSize(cita.motivo, 140);
+                    const motivoLineas = doc.splitTextToSize(motivoTexto, 140);
                     const alturaCajaMotivo = Math.max(30, motivoLineas.length * 6 + 15);
                     
                     doc.setFillColor(colores.azulMuyClaro[0], colores.azulMuyClaro[1], colores.azulMuyClaro[2]);
@@ -1401,7 +1444,12 @@
                         console.error('Error al generar nombre del archivo:', error);
                     }
                     
+                    console.log('Guardando PDF con nombre:', nombreArchivo);
                     doc.save(nombreArchivo);
+                    
+                    // Mostrar mensaje de éxito
+                    showToast('success', 'PDF Generado', 'El PDF de la cita se ha generado exitosamente');
+                    console.log('=== PDF GENERADO EXITOSAMENTE ===');
                 };
 
                 // Configurar fecha mínima (hoy)

@@ -4,8 +4,44 @@ const Cita = require('../models/citas');
 const Medicos = require('../models/medicos');
 const { autenticar } = require('../middleware/auth');
 
+/**
+ * @swagger
+ * tags:
+ *   name: Citas
+ *   description: Gestión de citas médicas
+ */
+
 // Middleware para autenticación en todas las rutas
 router.use(autenticar);
+
+/**
+ * @swagger
+ * /api/citas:
+ *   get:
+ *     summary: Obtener todas las citas del usuario autenticado
+ *     tags: [Citas]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de citas obtenida exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 citas:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Cita'
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error del servidor
+ */
 
 // GET - Obtener todas las citas del usuario autenticado
 router.get('/', async (req, res) => {
@@ -26,6 +62,34 @@ router.get('/', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/citas/todas:
+ *   get:
+ *     summary: Obtener todas las citas de todos los usuarios
+ *     tags: [Citas]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de todas las citas obtenida exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 citas:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Cita'
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error del servidor
+ */
 // GET - Obtener todas las citas de todos los usuarios (para mostrar en página de médicos)
 router.get('/todas', async (req, res) => {
     try {
@@ -48,6 +112,32 @@ router.get('/todas', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/citas/estadisticas:
+ *   get:
+ *     summary: Obtener estadísticas de las citas del usuario
+ *     tags: [Citas]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Estadísticas obtenidas exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 estadisticas:
+ *                   $ref: '#/components/schemas/Estadisticas'
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error del servidor
+ */
 // GET - Obtener estadísticas del usuario
 router.get('/estadisticas', async (req, res) => {
     try {
@@ -94,6 +184,44 @@ router.get('/estadisticas', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/citas/estado/{estado}:
+ *   get:
+ *     summary: Obtener citas filtradas por estado
+ *     tags: [Citas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: estado
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [pendiente, confirmada, completada, cancelada, no_asistio]
+ *         description: Estado de la cita
+ *     responses:
+ *       200:
+ *         description: Citas filtradas por estado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 citas:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Cita'
+ *       400:
+ *         description: Estado inválido
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error del servidor
+ */
 // GET - Obtener citas por estado
 router.get('/estado/:estado', async (req, res) => {
     try {
@@ -126,6 +254,34 @@ router.get('/estado/:estado', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/citas/proximas/agenda:
+ *   get:
+ *     summary: Obtener próximas citas (siguientes 30 días)
+ *     tags: [Citas]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Próximas citas obtenidas exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 citas:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Cita'
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error del servidor
+ */
 // GET - Obtener próximas citas (siguientes 30 días)
 router.get('/proximas/agenda', async (req, res) => {
     try {
@@ -156,6 +312,54 @@ router.get('/proximas/agenda', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/citas/horarios-disponibles/{medico}/{fecha}:
+ *   get:
+ *     summary: Obtener horarios disponibles para un médico en una fecha específica
+ *     tags: [Citas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: medico
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Nombre del médico
+ *       - in: path
+ *         name: fecha
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Fecha en formato YYYY-MM-DD
+ *     responses:
+ *       200:
+ *         description: Horarios disponibles obtenidos exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 horariosDisponibles:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                     pattern: '^([0-1][0-9]|2[0-3]):[0-5][0-9]$'
+ *                 horariosOcupados:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                     pattern: '^([0-1][0-9]|2[0-3]):[0-5][0-9]$'
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error del servidor
+ */
 // GET - Obtener horarios disponibles para un médico en una fecha específica
 router.get('/horarios-disponibles/:medico/:fecha', async (req, res) => {
     try {
@@ -193,6 +397,41 @@ router.get('/horarios-disponibles/:medico/:fecha', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/citas/{id}:
+ *   get:
+ *     summary: Obtener una cita específica por ID
+ *     tags: [Citas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID de la cita
+ *     responses:
+ *       200:
+ *         description: Cita obtenida exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 cita:
+ *                   $ref: '#/components/schemas/Cita'
+ *       404:
+ *         description: Cita no encontrada
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error del servidor
+ */
 // GET - Obtener una cita específica por ID
 router.get('/:id', async (req, res) => {
     try {
@@ -221,6 +460,52 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/citas:
+ *   post:
+ *     summary: Crear una nueva cita
+ *     tags: [Citas]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CitaInput'
+ *           example:
+ *             medico: "Dr. Juan Pérez"
+ *             fecha: "2025-07-20"
+ *             hora: "10:00"
+ *             motivo: "Consulta general"
+ *     responses:
+ *       201:
+ *         description: Cita creada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 mensaje:
+ *                   type: string
+ *                   example: "Cita creada exitosamente"
+ *                 cita:
+ *                   $ref: '#/components/schemas/Cita'
+ *       400:
+ *         description: Datos inválidos o cita en conflicto
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error del servidor
+ */
 // POST - Crear una nueva cita
 router.post('/', async (req, res) => {
     try {
@@ -313,6 +598,77 @@ router.post('/', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/citas/{id}:
+ *   put:
+ *     summary: Actualizar una cita existente
+ *     tags: [Citas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID de la cita
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               medico:
+ *                 type: string
+ *                 description: Nombre del médico
+ *               fecha:
+ *                 type: string
+ *                 format: date
+ *                 description: Fecha de la cita
+ *               hora:
+ *                 type: string
+ *                 pattern: '^([0-1][0-9]|2[0-3]):[0-5][0-9]$'
+ *                 description: Hora de la cita
+ *               motivo:
+ *                 type: string
+ *                 description: Motivo de la consulta
+ *               estado:
+ *                 type: string
+ *                 enum: [pendiente, confirmada, completada, cancelada, no_asistio]
+ *                 description: Estado de la cita
+ *           example:
+ *             medico: "Dr. Juan Pérez"
+ *             fecha: "2025-07-20"
+ *             hora: "11:00"
+ *             motivo: "Consulta de seguimiento"
+ *             estado: "confirmada"
+ *     responses:
+ *       200:
+ *         description: Cita actualizada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 mensaje:
+ *                   type: string
+ *                   example: "Cita actualizada exitosamente"
+ *                 cita:
+ *                   $ref: '#/components/schemas/Cita'
+ *       400:
+ *         description: Datos inválidos o cita no modificable
+ *       404:
+ *         description: Cita no encontrada
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error del servidor
+ */
 // PUT - Actualizar una cita existente
 router.put('/:id', async (req, res) => {
     try {
@@ -387,6 +743,35 @@ router.put('/:id', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/citas/{id}:
+ *   delete:
+ *     summary: Eliminar (cancelar) una cita
+ *     tags: [Citas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID de la cita
+ *     responses:
+ *       200:
+ *         description: Cita cancelada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       404:
+ *         description: Cita no encontrada
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error del servidor
+ */
 // DELETE - Eliminar (cancelar) una cita
 router.delete('/:id', async (req, res) => {
     try {
@@ -420,6 +805,61 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/citas/{id}/estado:
+ *   patch:
+ *     summary: Cambiar el estado de una cita
+ *     tags: [Citas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID de la cita
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - estado
+ *             properties:
+ *               estado:
+ *                 type: string
+ *                 enum: [pendiente, confirmada, completada, cancelada, no_asistio]
+ *                 description: Nuevo estado de la cita
+ *           example:
+ *             estado: "confirmada"
+ *     responses:
+ *       200:
+ *         description: Estado de la cita cambiado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 mensaje:
+ *                   type: string
+ *                   example: "Cita marcada como confirmada"
+ *                 cita:
+ *                   $ref: '#/components/schemas/Cita'
+ *       400:
+ *         description: Estado inválido
+ *       404:
+ *         description: Cita no encontrada
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error del servidor
+ */
 // PATCH - Cambiar estado de una cita
 router.patch('/:id/estado', async (req, res) => {
     try {

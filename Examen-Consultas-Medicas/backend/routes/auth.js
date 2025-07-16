@@ -6,6 +6,13 @@ const { autenticar } = require('../middleware/auth');
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * tags:
+ *   name: Autenticación
+ *   description: Gestión de autenticación y usuarios
+ */
+
 // Generar token JWT
 const generarToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET || 'secreto-jwt-consultas-medicas', {
@@ -13,6 +20,59 @@ const generarToken = (id) => {
   });
 };
 
+/**
+ * @swagger
+ * /api/auth/registro:
+ *   post:
+ *     summary: Registrar un nuevo usuario
+ *     tags: [Autenticación]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - nombre
+ *               - email
+ *               - contraseña
+ *             properties:
+ *               nombre:
+ *                 type: string
+ *                 description: Nombre completo del usuario
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Correo electrónico único
+ *               contraseña:
+ *                 type: string
+ *                 minLength: 6
+ *                 description: Contraseña (mínimo 6 caracteres)
+ *           example:
+ *             nombre: "Juan Pérez"
+ *             email: "juan@example.com"
+ *             contraseña: "password123"
+ *     responses:
+ *       201:
+ *         description: Usuario registrado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 mensaje:
+ *                   type: string
+ *                   example: "Usuario registrado exitosamente"
+ *                 token:
+ *                   type: string
+ *                   description: Token JWT para autenticación
+ *                 usuario:
+ *                   $ref: '#/components/schemas/Usuario'
+ *       400:
+ *         description: Datos inválidos o email ya registrado
+ *       500:
+ *         description: Error del servidor
+ */
 // @route   POST /api/auth/registro
 // @desc    Registrar nuevo usuario
 // @access  Public
@@ -76,6 +136,53 @@ router.post('/registro', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Iniciar sesión
+ *     tags: [Autenticación]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - contraseña
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Correo electrónico del usuario
+ *               contraseña:
+ *                 type: string
+ *                 description: Contraseña del usuario
+ *           example:
+ *             email: "juan@example.com"
+ *             contraseña: "password123"
+ *     responses:
+ *       200:
+ *         description: Inicio de sesión exitoso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 mensaje:
+ *                   type: string
+ *                   example: "Inicio de sesión exitoso"
+ *                 token:
+ *                   type: string
+ *                   description: Token JWT para autenticación
+ *                 usuario:
+ *                   $ref: '#/components/schemas/Usuario'
+ *       400:
+ *         description: Credenciales inválidas
+ *       500:
+ *         description: Error del servidor
+ */
 // @route   POST /api/auth/login
 // @desc    Iniciar sesión
 // @access  Public
@@ -128,6 +235,32 @@ router.post('/login', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/auth/perfil:
+ *   get:
+ *     summary: Obtener perfil del usuario autenticado
+ *     tags: [Autenticación]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Perfil del usuario obtenido exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 usuario:
+ *                   $ref: '#/components/schemas/Usuario'
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error del servidor
+ */
 // @route   GET /api/auth/perfil
 // @desc    Obtener perfil del usuario autenticado
 // @access  Private
